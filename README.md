@@ -46,6 +46,3 @@ Noise Effect: Differentiation amplifies noise, causing wild fluctuations in acce
 
 Conclusion:
 Numerical differentiation amplifies measurement noise while integration suppresses it, demonstrating that accumulating data cancels out random errors while calculating rates of change magnifies them.
-
-
-#test
