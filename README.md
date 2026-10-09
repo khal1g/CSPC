@@ -27,15 +27,25 @@ Tests: all passing? yes
 Conclusion:
 Using Conda ensures complete environment reproducibility across machines. Vectorizing operations with NumPy dramatically speeds up calculations compared to Python loops. Unit testing with pytest verifies physical validity.
 
-Lab B: Data, Plotting, and Automation
+PW1 - Lab B: Data, Plotting, and Automation
+
+Results & Analysis
+- **Data Observation:** Dataset `decay_observed.csv` demonstrates exponential decay behavior over time.
+- **Comparison:** The experimental scatter plot aligns extremely well with the analytical decay law $N(t) = N_0 e^{-\lambda t}$ using $\lambda = 0.3$, confirming theoretical expectations.
+- **Pipeline Automation:** A Snakemake rule was configured to manage figure generation, triggering recalculations automatically only when dependency files are modified.
+
+PW2 Lab A: Motion from Tracking Data
 
 What I built:
-Loaded real decay observation data from CSV, plotted a side-by-side comparison between experimental data and the analytical decay law, and automated the visualization pipeline using Snakemake.
+Loaded noisy free-fall tracking data from CSV, calculated velocity and acceleration using numerical differentiation (`numpy.gradient`), integrated back to recover position using `scipy.integrate.cumulative_trapezoid`, and generated a three-panel plot comparing position, velocity, and acceleration.
 
 Results & Observations:
-    Data match: The observed scatter points perfectly follow the theoretical exponential curve ($N_0 e^{-\lambda t}$ with $\lambda = 0.3$).
+Mean Acceleration: -9.81 m/s² (matches theoretical gravity $g \approx 9.81 \text{ m/s}^2$).
 
-    Pipeline: Snakemake tracks file timestamps and automatically rebuilds figure.png only when inputs change.
+Noise Effect: Differentiation amplifies noise, causing wild fluctuations in acceleration even with smooth position data. Integration suppresses noise, recovering the original trajectory within ~1 m.
 
 Conclusion:
-Comparing real data with analytical models side-by-side validates physical expectations. Automating figure generation with Snakemake ensures workflow reproducibility and avoids unnecessary re-computations.
+Numerical differentiation amplifies measurement noise while integration suppresses it, demonstrating that accumulating data cancels out random errors while calculating rates of change magnifies them.
+
+
+#test
