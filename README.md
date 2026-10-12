@@ -46,3 +46,14 @@ Noise Effect: Differentiation amplifies noise, causing wild fluctuations in acce
 
 Conclusion:
 Numerical differentiation amplifies measurement noise while integration suppresses it, demonstrating that accumulating data cancels out random errors while calculating rates of change magnifies them.
+
+PW2 - Lab B: Optimization in Chemistry
+
+What I built:
+Implemented and compared three numerical optimization algorithms (Gradient Descent, Newton's method, and SLSQP via `scipy.optimize.minimize`) across convex and complex cost landscapes. Applied these optimization techniques to real chemical problems: fitting reaction rate kinetics from experimental data, calculating chemical equilibrium concentrations, and identifying titration equivalence points.
+
+Results & Observations:
+- **Optimization Methods Comparison:** On simple convex functions ($f(x) = (x-3)^2 + 1$), all three methods converge easily to $x \approx 3$. On complex landscapes ($g(x) = x^4 - 3x^2 + x + 5$), initial guesses ($x_0$) drastically influence convergence; Newton's method requires checking second-derivative signs ($g'' > 0$) to distinguish minima from local maxima or stationary points.
+- **Reaction Rate Fitting:** Fitted first-order kinetics $C(t) = C_0 e^{-kt}$ by minimizing total squared error, obtaining a rate constant $k \approx 0.25 \text{ s}^{-1}$.
+- **Chemical Equilibrium:** Solved the equilibrium imbalance equation $\frac{(2x)^2}{(1-x)^2} - K = 0$ using both `scipy.optimize.newton` and SLSQP minimization, yielding identical extent of reaction $x \approx 0.66$ (corresponding to $n_{\text{HI}} \approx 1.33 \text{ mol}$).
+- **Titration Equivalence Point:** Located the steepest point of the pH curve using numerical differentiation (`np.gradient`), finding the peak derivative at $V \approx 50 \text{ mL}$.
