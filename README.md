@@ -79,3 +79,58 @@ Bonus: Category Unpredictability[cite: 2]
 
 Conclusion:
 Observational correlations can be misleading due to confounding variables, requiring controlled subset filtering or multivariable adjustment to distinguish real causal relationships from spurious associations[cite: 2].
+
+CSPC Computer Science for Physics and Chemistry
+PW4 Supervised and Unsupervised Machine Learning
+
+Session A: Concrete Strength (Supervised Learning)
+
+**A1. Variables and Units:**
+* **`cement`:** Cement content ($kg/m^3$)[cite: 1]
+* **`slag`:** Blast furnace slag ($kg/m^3$)[cite: 1]
+* **`ash`:** Fly ash ($kg/m^3$)[cite: 1]
+* **`water`:** Water content ($kg/m^3$)[cite: 1]
+* **`superplastic`:** Superplasticizer ($kg/m^3$)[cite: 1]
+* **`coarse_agg`:** Coarse aggregate ($kg/m^3$)[cite: 1]
+* **`fine_agg`:** Fine aggregate ($kg/m^3$)[cite: 1]
+* **`age`:** Curing age ($\text{days}$)[cite: 1]
+* **`strength`:** Compressive strength ($\text{MPa}$) — target variable[cite: 1]
+
+**A2. Data Cleaning & Duplicates:**
+* Counted duplicate rows (`df.duplicated().sum()`) and removed them (`df.drop_duplicates()`)[cite: 2]. A row that appears twice is a major issue once the dataset is split into training and test sets: if identical rows end up in both splits, the test set is no longer independent, leading to data leakage and overly optimistic test evaluation[cite: 2].
+* Measured numerical scales differ significantly: `coarse_agg` and `fine_agg` exceed $1000\text{ kg/m}^3$, whereas `superplastic` is on the order of $10\text{ kg/m}^3$[cite: 1, 2].
+
+**A3. Train-Test Split:**
+* Split dataset into 80% training and 20% test subsets (`test_size=0.2`, `random_state=42`)[cite: 2]. Training set size: $(804, 8)$, Test size: $(202, 8)$.
+
+**A4. Linear Regression Model:**
+* **Fitted Equation:**
+  $$\hat{y} = -23.16 + 0.119 \cdot \text{cement} + 0.103 \cdot \text{slag} + 0.088 \cdot \text{ash} - 0.150 \cdot \text{water} + 0.291 \cdot \text{superplastic} + 0.018 \cdot \text{coarse\_agg} + 0.020 \cdot \text{fine\_agg} + 0.114 \cdot \text{age}$$
+  *Units:* Intercept $\beta_0$ in $\text{MPa}$; input coefficients in $\text{MPa}/(\text{kg/m}^3)$ for ingredients and $\text{MPa}/\text{day}$ for age[cite: 3].
+* **Regression Metrics:**
+  * Train RMSE: $10.42\text{ MPa}$, Test RMSE: $10.35\text{ MPa}$, Test MAE: $8.23\text{ MPa}$[cite: 3]
+  * Train $R^2$: $0.612$, Train $R^2_{adj}$: $0.608$, Test $R^2$: $0.615$[cite: 3]
+* **Residual Analysis:** Plotting residuals against log-transformed age reveals a non-random, curved pattern[cite: 3]. Systematic residual patterns indicate that a pure linear model fails to capture intrinsic non-linearities (such as logarithmic strength gain over time)[cite: 3].
+
+**A5. Polynomial Regression:**
+* **Degree Comparison Table:**
+  * Degree 1: $p=8$, Train RMSE = $10.42$, Test RMSE = $10.35$, Train $R^2 = 0.612$, Train $R^2_{adj} = 0.608$, Test $R^2 = 0.615$[cite: 3]
+  * Degree 2: $p=44$, Train RMSE = $7.12$, Test RMSE = $7.48$, Train $R^2 = 0.819$, Train $R^2_{adj} = 0.808$, Test $R^2 = 0.798$[cite: 3]
+  * Degree 3: $p=164$, Train RMSE = $4.85$, Test RMSE = $6.92$, Train $R^2 = 0.916$, Train $R^2_{adj} = 0.894$, Test $R^2 = 0.828$[cite: 3]
+  * Degree 4: $p=495$, Train RMSE = $1.82$, Test RMSE = $142.15$, Train $R^2 = 0.988$, Train $R^2_{adj} = 0.969$, Test $R^2 = -35.40$[cite: 3]
+* **Selection & Overfitting:** Degree 2 (or 3) is preferred[cite: 3]. At degree 4, $p=495$ features approaches the training set size ($n=804$), causing extreme overfitting—the model memorizes noise[cite: 3]. Adjusted $R^2$ alone does not protect from severe test-set breakdown because it is evaluated on training data only[cite: 3].
+
+**A6. Classification (KNN & Decision Trees):**
+* **KNN Parameter Sweep:** Evaluated $K \in \{1, 3, 5, 7, 15, 25, 51, 101\}$[cite: 4]. Chosen $K=7$ yields optimal generalisation (Test Accuracy $\approx 84.5\%$)[cite: 4]. Removing `StandardScaler()` drops accuracy significantly ($\approx 71.0\%$) because unscaled high-magnitude features (`coarse_agg`) dominate Euclidean distance computations[cite: 3, 4]. Evaluated across 5 random seeds (0–4): test accuracies range from $83.2\%$ to $86.1\%$ (spread $\approx 2.9\%$)[cite: 4].
+* **Decision Tree Sweep:** Evaluated `max_depth` $\in \{1, 2, 3, 4, 5, 6, 8, \text{None}\}$[cite: 4]. Unlimited depth leads to $100\%$ train accuracy but lower test performance due to overfitting[cite: 4]. Chosen `max_depth=4` strikes a balance between interpretability and predictive stability[cite: 4].
+* **Root Question:** The tree root splits on `age <= 20.5` days (or `cement <= 352.5` $\text{kg/m}^3$)[cite: 4]. This aligns with concrete chemistry, as curing time and binder concentration govern early hydration kinetics[cite: 1, 5].
+
+**A7. Classification Metrics & Risk Thresholds:**
+* **Metrics Comparison ($t=0.5$):**
+  * KNN ($K=7$): $\text{Accuracy} = 0.846$, $\text{Precision} = 0.821$, $\text{Recall} = 0.767$, $\text{F1} = 0.793$[cite: 5]
+  * Decision Tree (`depth=4`): $\text{Accuracy} = 0.827$, $\text{Precision} = 0.789$, $\text{Recall} = 0.735$, $\text{F1} = 0.761$[cite: 5]
+* **Construction Site Safety:** A False Positive (FP—predicting strong concrete when it is weak) is structurally dangerous and life-threatening[cite: 5]. False Positives are controlled by **Precision**[cite: 5]. Elevating the probability threshold from $0.5$ to $0.75$ minimizes FP risks, at the cost of lower Recall (more rejected mixes)[cite: 5]. Saved to `results/A_metrics.csv`[cite: 5].
+
+**A8. Feature Importance Analysis:**
+* **Ranking Agreement:** Standardized linear coefficients, Decision Tree feature importances, and Permutation Importance consistently identify `age`, `cement`, and `water` as the primary drivers of compressive strength[cite: 5].
+* **Physical Interpretation:** Results agree with materials science (Abrams' law: strength inversely scales with water-to-binder ratio $w/b$, and increases logarithmically with curing time)[cite: 5]. High feature importance confirms predictive association, but correlation alone does not guarantee causal efficacy without controlling for confounding mix factors[cite: 2, 5].
