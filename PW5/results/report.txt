@@ -1,0 +1,20 @@
+# Seismic Events Summary Report
+
+File: data/seismogram_A.csv
+  - P-wave arrival (tp): 108.42 s
+  - S-wave arrival (ts): 144.08 s
+  - Distance (R): 306.13 km
+  - Origin time: 59.04 s
+  - Peak Ground Velocity (PGV): 1.5105 cm/s
+  - Magnitude (M): 6.66
+
+File: data/seismogram_B.csv
+  - P-wave arrival (tp): 84.25 s
+  - S-wave arrival (ts): 102.43 s
+  - Distance (R): 156.07 km
+  - Origin time: 59.08 s
+  - Peak Ground Velocity (PGV): 0.5711 cm/s
+  - Magnitude (M): 5.36
+
+
+Conclusion: Earthquake B was closer to the station, and earthquake A was stronger.

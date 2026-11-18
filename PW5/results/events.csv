@@ -1,0 +1,3 @@
+file,tp,ts,R_km,origin_time,pgv_cm_s,magnitude
+data/seismogram_A.csv,108.42,144.08,306.13,59.04,1.5105,6.66
+data/seismogram_B.csv,84.25,102.43,156.07,59.08,0.5711,5.36

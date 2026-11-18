@@ -164,3 +164,46 @@ Session A: Concrete Strength (Supervised Learning)
 **B7. Automate the Lab with Snakemake:**
 * Created a `Snakefile` with rules `all`, `fetch`, `session_a`, and `session_b`[cite: 8].
 * Tested dry-run (`snakemake -n`), deleted folders to rebuild with `snakemake --cores 1`, re-ran to confirm "Nothing to be done", and tested modifying hyperparameters to verify partial rebuilding behavior[cite: 8]. One command to reproduce all of PW4: `snakemake --cores 1`[cite: 1, 8].
+
+# CSPC Computer Science for Physics and Chemistry
+## PW5 Signal Processing: Where Was the Earthquake, and How Strong?
+
+### Signal Processing & Seismogram Analysis
+
+**1. Record Overview & Channels:**
+* Three-channel broadband seismic records (`Z`, `N`, `E`) measure ground velocity in $m/s$ sampled at $100\text{ Hz}$ ($fs = 1 / (t[1] - t[0])$)[cite: 10].
+* The first, weaker shaking appears most clearly on the vertical channel (`Z`), while the stronger, later shaking dominates the horizontal channels (`N`, `E`)[cite: 10, 11].
+* Zooming into the first 60 seconds confirms background station noise before the event[cite: 10].
+
+**2. The Spectrum & Frequency Analysis:**
+* Computed the Fast Fourier Transform (`np.fft.fft`) and frequency mapping (`np.fft.fftfreq`)[cite: 10]. The spectrum is mirrored around $0\text{ Hz}$ due to mathematical conjugate symmetry for real-valued time series data[cite: 10].
+* Log-log background noise analysis reveals strong microseisms caused by ocean waves hitting coasts[cite: 10]. The earthquake adds most of its energy within specific frequency bands[cite: 10].
+
+**3. Inverse Transform & Manual Band-Pass Filter:**
+* Verified that `np.fft.ifft(np.fft.fft(Z)).real` equals `Z` using `np.allclose`, demonstrating that frequency-domain filtering relies on exact round-trip reconstruction[cite: 11].
+* Implemented `bandpass(x, fs, a, b)` with cut-offs $a = 0.5\text{ Hz}$ and $b = 10\text{ Hz}$ based on spectral energy distribution[cite: 11].
+
+**4. Envelopes & Horizontal Motion:**
+* Computed moving-average envelopes using `np.convolve` with a $0.5\text{ s}$ window[cite: 11]. Total horizontal motion was calculated as $\sqrt{N^2 + E^2}$[cite: 11].
+* Window size selection is critical: too short windows capture excessive noise, while too long windows excessively smooth and smear the transient arrival features[cite: 11].
+
+**5. Arrival Times ($t_P$ and $t_S$):**
+* P-wave arrival $t_P$ is defined as the first time the filtered $Z$ envelope exceeds $5\%$ of its maximum[cite: 11]. S-wave arrival $t_S$ is taken when the horizontal envelope exceeds $10\%$ of its maximum after $t_P + 2\text{ s}$[cite: 11].
+* Using the absolute maximum instead of the start of shaking gives an incorrect distance because peaks correspond to peak energy rather than the initial onset of wave propagation[cite: 11].
+
+**6. Epicentral Distance & Origin Time:**
+* Given P-wave speed $v_P = 6.2\text{ km/s}$ and S-wave speed $v_S = 3.6\text{ km/s}$, distance $R$ is computed as[cite: 10, 11]:
+  $$R = \frac{t_S - t_P}{\frac{1}{v_S} - \frac{1}{v_P}}$$
+* An uncertainty of $1\text{ s}$ in $t_S$ directly affects the calculation of $R$[cite: 11]. Origin time is estimated as $t_P - R/v_P$[cite: 11].
+
+**7. Spectrogram Analysis:**
+* Generated spectrograms using `scipy.signal.spectrogram` with `nperseg=256` up to $10\text{ Hz}$[cite: 12]. Spectrograms reveal time-frequency localization (showing when specific frequencies arrive—P-waves, S-waves, and slower surface waves) which single static spectra cannot display[cite: 12].
+
+**8. Magnitude Estimation:**
+* Computed Peak Ground Velocity ($PGV$) from horizontal raw components in $cm/s$ and estimated magnitude $M$ using[cite: 12]:
+  $$M = \frac{\log_{10}(PGV[cm/s]) + \log_{10}(R[km]) + 1.0}{0.55}$$
+* The $\log_{10} R$ term compensates for geometrical wave attenuation; ignoring it would incorrectly underestimate the magnitude of a seismogram recorded further away[cite: 12].
+
+**9. Complete System & Automation (`analyse.py`, `report.py`, `Snakefile`):**
+* Automated workflow processes both records through `analyse.py` to produce `results/events.csv`, and summarizes results via `report.py` into `results/report.txt`[cite: 12].
+* Snakemake pipeline rules (`analyse`, `report`, `all`) ensure complete reproducibility[cite: 12]. Running `snakemake --cores 1` rebuilds outputs, and re-running reports "Nothing to be done" if dependencies are unchanged[cite: 12]. Modifying script logic or parameters selectively triggers dependent rule re-execution[cite: 12].
