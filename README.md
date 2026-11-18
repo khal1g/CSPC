@@ -134,3 +134,33 @@ Session A: Concrete Strength (Supervised Learning)
 **A8. Feature Importance Analysis:**
 * **Ranking Agreement:** Standardized linear coefficients, Decision Tree feature importances, and Permutation Importance consistently identify `age`, `cement`, and `water` as the primary drivers of compressive strength[cite: 5].
 * **Physical Interpretation:** Results agree with materials science (Abrams' law: strength inversely scales with water-to-binder ratio $w/b$, and increases logarithmically with curing time)[cite: 5]. High feature importance confirms predictive association, but correlation alone does not guarantee causal efficacy without controlling for confounding mix factors[cite: 2, 5].
+
+### Session B: Wine Chemistry (Unsupervised Learning)
+
+**B1. Load and Hide Labels:**
+* Loaded the UCI Wine dataset via `load_wine(as_frame=True)` containing 178 wine samples across 13 chemical measurements and 3 cultivars[cite: 6].
+* `X.describe()` shows that `proline` and `magnesium` have the largest numerical ranges and standard deviations, while `nonflavanoid_phenols` and `ash` have the smallest[cite: 6].
+
+**B2. PCA on Raw Data:**
+* Fitted an unscaled PCA model (`PCA()`)[cite: 6]. PC1 explains >99.9% of the total variance and is completely dominated by `proline` due to its huge numerical magnitude[cite: 6]. Therefore, unscaled PC1 cannot be accepted as the main chemical difference between the wines[cite: 6].
+
+**B3. Scale, then PCA Again:**
+* Standardized the dataset using `StandardScaler()` before fitting a new PCA[cite: 6, 7].
+* **10 components** are required to keep $\ge 90\%$ of the cumulative variance, while the PC1-PC2 plane retains over $55.4\%$[cite: 6, 7].
+* Sorted loadings for PC1 and PC2 indicate which chemical measurements push a wine toward the positive or negative side of each component[cite: 7]. A single-color scatter plot on the PC1-PC2 plane visually suggests distinct data groupings[cite: 7].
+
+**B4. K-Means Clustering:**
+* Evaluated $K$-Means with $k=3$ and `n_init=1` across multiple random seeds ($0$ to $7$); values differ due to local minima traps from random initialization[cite: 7]. Setting `n_init=10` resolves this by running multiple times and keeping the run with the lowest inertia[cite: 7].
+* Computed inertia for $k=1, \dots, 10$ with `n_init=10` and chose $k=3$ from the elbow of the curve[cite: 7]. $k$ cannot be chosen by simply minimizing inertia because inertia continuously decreases toward zero as $k$ increases[cite: 7].
+
+**B5. What are the Clusters?**
+* Reported cluster sizes using `np.bincount(km.labels_)`[cite: 7].
+* Brought cluster centers back to real units using `scaler.inverse_transform(km.cluster_centers_)`[cite: 7]. Described each cluster based on the chemical features where centers differ most, and redrew the PC1-PC2 scatter plot colored by cluster labels (`c=km.labels_`)[cite: 7].
+
+**B6. The Reveal:**
+* Compared unsupervised clusters against true grape varieties (`cultivar`) using cross-tabulation (`pd.crosstab`) and computed agreement scores for (i) scaled data, (ii) raw data, and (iii) the first two principal components[cite: 7].
+* High agreement demonstrates that unsupervised chemistry strongly aligns with grape varieties without ever seeing labels[cite: 7]. Saved agreement table to `results/B_agreement.csv`[cite: 7].
+
+**B7. Automate the Lab with Snakemake:**
+* Created a `Snakefile` with rules `all`, `fetch`, `session_a`, and `session_b`[cite: 8].
+* Tested dry-run (`snakemake -n`), deleted folders to rebuild with `snakemake --cores 1`, re-ran to confirm "Nothing to be done", and tested modifying hyperparameters to verify partial rebuilding behavior[cite: 8]. One command to reproduce all of PW4: `snakemake --cores 1`[cite: 1, 8].
